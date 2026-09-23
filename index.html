@@ -23,12 +23,7 @@
         .prime { background: #00A8E1; color: white; }
         .jiohotstar { background: #0F3CC9; color: white; }
         .marvel { background: #F0131E; color: white; }
-        .watch-btn { background: #fff; color: #000; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 13px; }
-        
-        .video-player-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        .video-wrapper { width: 90%; max-width: 700px; aspect-ratio: 16/9; background: #000; position: relative; }
-        .video-wrapper iframe { width: 100%; height: 100%; border: none; }
-        .close-player { background: #E50914; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 5px; margin-top: 15px; cursor: pointer; }
+        .watch-btn { background: #fff; color: #000; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; display: block; text-decoration: none; text-align: center; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -53,29 +48,22 @@
         <!-- Movies load here -->
     </div>
 
-    <div id="videoPlayerModal" class="video-player-container">
-        <div class="video-wrapper">
-            <iframe id="videoIframe" src="" allowfullscreen></iframe>
-        </div>
-        <button class="close-player" onclick="closeVideoPlayer()">❌ Close Video</button>
-    </div>
-
     <script>
         const moviesData = [
             // ACTION
-            { title: "Avengers: Secret Wars", category: "Action", platform: "marvel", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Jawan 2", category: "Action", platform: "jiohotstar", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Spider-Man: Beyond the Spider-Verse", category: "Action", platform: "marvel", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Avengers: Secret Wars", category: "Action", platform: "marvel", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Jawan 2", category: "Action", platform: "jiohotstar", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Spider-Man: Beyond the Spider-Verse", category: "Action", platform: "marvel", url: "https://youtube.com", img: "https://unsplash.com" },
             // THRILLER
-            { title: "Stranger Things Season 5", category: "Thriller", platform: "netflix", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Drishyam 3", category: "Thriller", platform: "jiohotstar", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Citadel Season 2", category: "Thriller", platform: "prime", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Stranger Things Season 5", category: "Thriller", platform: "netflix", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Drishyam 3", category: "Thriller", platform: "jiohotstar", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Citadel Season 2", category: "Thriller", platform: "prime", url: "https://youtube.com", img: "https://unsplash.com" },
             // COMEDY
-            { title: "Hera Pheri 3", category: "Comedy", platform: "jiohotstar", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Red Notice 2", category: "Comedy", platform: "netflix", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Hera Pheri 3", category: "Comedy", platform: "jiohotstar", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Red Notice 2", category: "Comedy", platform: "netflix", url: "https://youtube.com", img: "https://unsplash.com" },
             // HORROR
-            { title: "The Conjuring: Last Rites", category: "Horror", platform: "prime", embedUrl: "https://youtube.com", img: "https://unsplash.com" },
-            { title: "Stree 3", category: "Horror", platform: "jiohotstar", embedUrl: "https://youtube.com", img: "https://unsplash.com" }
+            { title: "The Conjuring: Last Rites", category: "Horror", platform: "prime", url: "https://youtube.com", img: "https://unsplash.com" },
+            { title: "Stree 3", category: "Horror", platform: "jiohotstar", url: "https://youtube.com", img: "https://unsplash.com" }
         ];
 
         function loadMovies(filterText = "") {
@@ -98,7 +86,7 @@
                                 <div class="movie-info">
                                     <div class="movie-title">${movie.title}</div>
                                     <span class="platform-tag ${movie.platform}">${movie.platform}</span>
-                                    <button class="watch-btn" onclick="playVideo('${movie.embedUrl}')">Watch Now</button>
+                                    <a class="watch-btn" href="${movie.url}" target="_blank">Watch Now</a>
                                 </div>
                             </div>
                         `;
@@ -107,20 +95,6 @@
                     container.appendChild(catSection);
                 }
             });
-        }
-
-        function playVideo(embedUrl) {
-            const modal = document.getElementById("videoPlayerModal");
-            const iframe = document.getElementById("videoIframe");
-            iframe.src = embedUrl;
-            modal.style.display = "flex";
-        }
-
-        function closeVideoPlayer() {
-            const modal = document.getElementById("videoPlayerModal");
-            const iframe = document.getElementById("videoIframe");
-            iframe.src = "";
-            modal.style.display = "none";
         }
 
         function searchMovies() {
