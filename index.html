@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Watch - Global Movie Aggregator</title>
+    <style>
+        body { background-color: #0b0b0b; color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.8); border-bottom: 2px solid #E50914; sticky: top; }
+        .logo { font-size: 24px; font-weight: bold; color: #E50914; display: flex; align-items: center; gap: 8px; }
+        .search-container { padding: 15px; text-align: center; }
+        .search-bar { width: 85%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #333; background: #1c1c1c; color: white; font-size: 16px; outline: none; }
+        .sub-banner { background: linear-gradient(to right, #1e1e1e, #2a2a2a); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .sub-btn { background: #FFD700; color: black; border: none; padding: 8px 15px; font-weight: bold; border-radius: 20px; cursor: pointer; }
+        .category-title { margin: 20px 15px 10px 15px; font-size: 20px; color: #f1f1f1; border-left: 4px solid #E50914; padding-left: 8px; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 15px; }
+        .movie-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #222; text-align: center; display: flex; flex-direction: column; }
+        .movie-poster { width: 100%; height: 200px; object-fit: cover; background: #222; }
+        .movie-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .movie-title { font-size: 14px; margin: 5px 0; font-weight: bold; }
+        .platform-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
+        .netflix { background: #E50914; color: white; }
+        .prime { background: #00A8E1; color: white; }
+        .jiohotstar { background: #0F3CC9; color: white; }
+        .marvel { background: #F0131E; color: white; }
+        .watch-btn { background: #fff; color: #000; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 13px; }
+        
+        /* Modal Style for Smart Deep Linking */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 10; }
+        .modal-content { background: #1c1c1c; padding: 25px; border-radius: 12px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        .modal-btn { background: #E50914; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 8px; margin-top: 15px; width: 100%; font-weight: bold; }
+        .close-modal { color: #aaa; float: right; font-size: 24px; cursor: pointer; margin-top: -15px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">👑 Next Watch 🔫</div>
+    </div>
+
+    <div class="sub-banner">
+        <div>
+            <div style="font-weight:bold; font-size:15px;">👑 Premium Access</div>
+            <div style="font-size:12px; color:#aaa; margin-top:4px;">12 Days for ₹40 | 32 Days for ₹144</div>
+        </div>
+        <button class="sub-btn" onclick="openSubModal()">Activate</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search Netflix, JioHotstar, Marvel..." onkeyup="searchMovies()">
+    </div>
+
+    <div id="categories-container">
+        <!-- Categories and movies will load here from script.js -->
+    </div>
+
+    <!-- Smart Player Modal -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 id="modalMovieTitle">Movie Title</h3>
+            <p style="font-size:14px; color:#aaa;">Connecting to secure global stream database...</p>
+            <button class="modal-btn" id="modalActionBtn">🚀 Open Deep Stream</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ENGINE & LOGIC ---
+        const moviesData = [
+            // ACTION
+            { title: "Avengers: Secret Wars", category: "Action", platform: "marvel", url: "https://youtube.com" },
+            { title: "Jawan 2", category: "Action", platform: "jiohotstar", url: "https://youtube.com" },
+            { title: "Spider-Man: Beyond the Spider-Verse", category: "Action", platform: "marvel", url: "https://youtube.com" },
+            // THRILLER
+            { title: "Stranger Things Season 5", category: "Thriller", platform: "netflix", url: "https://youtube.com" },
+            { title: "Drishyam 3", category: "Thriller", platform: "jiohotstar", url: "https://youtube.com" },
+            { title: "Citadel Season 2", category: "Thriller", platform: "prime", url: "https://youtube.com" },
+            // COMEDY
+            { title: "Hera Pheri 3", category: "Comedy", platform: "jiohotstar", url: "https://youtube.com" },
+            { title: "Red Notice 2", category: "Comedy", platform: "netflix", url: "https://youtube.com" },
+            // HORROR
+            { title: "The Conjuring: Last Rites", category: "Horror", platform: "prime", url: "https://youtube.com" },
+            { title: "Stree 3", category: "Horror", platform: "jiohotstar", url: "https://youtube.com" }
+        ];
+
+        // 7-Day Auto Update Simulation logic
+        console.log("7-Day Global Movie Fetcher Sync Complete. Next refresh in 7 days.");
+
+        function loadMovies(filterText = "") {
+            const container = document.getElementById("categories-container");
+            container.innerHTML = "";
+            const categories = ["Action", "Thriller", "Comedy", "Horror"];
+
+            categories.forEach(cat => {
+                const filtered = moviesData.filter(m => m.category === cat && m.title.toLowerCase().includes(filterText.toLowerCase()));
+                if (filtered.length > 0) {
+                    const catSection = document.createElement("div");
+                    catSection.innerHTML = `<div class="category-title">${cat} Movies</div>`;
+                    const grid = document.createElement("div");
+                    grid.className = "movie-grid";
+
+                    filtered.forEach(movie => {
+                        grid.innerHTML += `
+                            <div class="movie-card">
+                                <div class="movie-poster" style="display:flex; align-items:center; justify-content:center; background:#222; color:#555; font-size:12px; padding:10px; box-sizing:border-box;">🎬 Poster Grid</div>
+                                <div class="movie-info">
+                                    <div class="movie-title">${movie.title}</div>
+                                    <span class="platform-tag ${movie.platform}">${movie.platform}</span>
+                                    <button class="watch-btn" onclick="openPlayer('${movie.title}', '${movie.url}')">Watch Now</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    catSection.appendChild(grid);
+                    container.appendChild(catSection);
+                }
+            });
+        }
+
+        function searchMovies() {
+            const query = document.getElementById("searchInput").value;
+            loadMovies(query);
+        }
+
+        function openPlayer(title, url) {
+            document.getElementById("modalMovieTitle").innerText = title;
+            document.getElementById("playerModal").style.display = "flex";
+            document.getElementById("modalActionBtn").onclick = function() {
+                window.open(url, '_blank');
+            };
+        }
+
+        function closeModal() {
+            document.getElementById("playerModal").style.display = "none";
+        }
+
+        function openSubModal() {
+            alert("👑 Next Watch Premium Activation:\n\nPlan 1: 12 Days for ₹40\nPlan 2: 32 Days for ₹144\n\nGoogle Play Payment Gateway Interface linking initiated!");
+        }
+
+        // Initial Load
+        loadMovies();
+    </script>
+</body>
+</html>
