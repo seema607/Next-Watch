@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -44,12 +44,11 @@
     <div id="categories-container">
         <div class="category-title" id="main-title">Trending Live Releases</div>
         <div class="movie-grid" id="movie-grid-display">
-            <!-- Dynamic Movies will load here -->
+            <!-- Movies load here -->
         </div>
     </div>
 
     <script>
-        // Real-time Global TMDB API Key for Millions of Movies
         const apiKey = "a787b4119da4229988182283cb0703f8"; 
 
         async function loadTrendingMovies() {
@@ -97,8 +96,6 @@
                 
                 let finalAppUrl = "";
                 const cleanTitle = encodeURIComponent(movie.title);
-
-                // Safe Direct High-Quality Trailer Link that opens instantly
                 finalAppUrl = `https://youtube.com{cleanTitle}+official+trailer`;
 
                 grid.innerHTML += `
