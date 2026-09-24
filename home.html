@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Watch - Global Movie Engine</title>
+    <style>
+        body { background-color: #0b0b0b; color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.8); border-bottom: 2px solid #E50914; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: bold; color: #E50914; display: flex; align-items: center; gap: 8px; }
+        .search-container { padding: 15px; text-align: center; }
+        .search-bar { width: 85%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #333; background: #1c1c1c; color: white; font-size: 16px; outline: none; }
+        .sub-banner { background: linear-gradient(to right, #1e1e1e, #2a2a2a); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .sub-btn { background: #FFD700; color: black; border: none; padding: 8px 15px; font-weight: bold; border-radius: 20px; cursor: pointer; }
+        .category-title { margin: 20px 15px 10px 15px; font-size: 20px; color: #f1f1f1; border-left: 4px solid #E50914; padding-left: 8px; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 15px; }
+        .movie-card { background: #181818; border-radius: 8px; overflow: hidden; border: 1px solid #222; text-align: center; display: flex; flex-direction: column; }
+        .movie-poster { width: 100%; height: 210px; object-fit: cover; background: #222; }
+        .movie-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .movie-title { font-size: 14px; margin: 5px 0; font-weight: bold; min-height: 40px; display: flex; align-items: center; justify-content: center; }
+        .platform-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; color: white; }
+        .watch-btn { background: #E50914; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 13px; text-decoration: none; display: block; box-sizing: border-box; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">👑 Next Watch 🔫</div>
+    </div>
+
+    <div class="sub-banner">
+        <div>
+            <div style="font-weight:bold; font-size:15px;">👑 Premium Access</div>
+            <div style="font-size:12px; color:#aaa; margin-top:4px;">12 Days for ₹40 | 32 Days for ₹144</div>
+        </div>
+        <button class="sub-btn" onclick="openSubModal()">Activate</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search ANY Movie (Netflix, JioStar, Marvel...)" onkeypress="handleKeyPress(event)">
+        <button onclick="searchLiveMovies()" style="background:#E50914; color:white; border:none; padding:10px 20px; border-radius:20px; margin-top:10px; font-weight:bold; cursor:pointer;">Search Database</button>
+    </div>
+
+    <div id="categories-container">
+        <div class="category-title" id="main-title">Trending Live Releases</div>
+        <div class="movie-grid" id="movie-grid-display">
+            <!-- Movies load here -->
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "a787b4119da4229988182283cb0703f8"; 
+
+        async function loadTrendingMovies() {
+            const url = `https://themoviedb.org{apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayMovies(data.results);
+            } catch (error) {
+                console.log("Error loading trending movies", error);
+            }
+        }
+
+        async function searchLiveMovies() {
+            const query = document.getElementById("searchInput").value;
+            if (!query) return;
+            
+            document.getElementById("main-title").innerText = `Search Results for: "${query}"`;
+            const url = `https://themoviedb.org{apiKey}&query=${encodeURIComponent(query)}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayMovies(data.results);
+            } catch (error) {
+                console.log("Error searching movie database", error);
+            }
+        }
+
+        function displayMovies(movies) {
+            const grid = document.getElementById("movie-grid-display");
+            grid.innerHTML = "";
+            
+            if (!movies || movies.length === 0) {
+                grid.innerHTML = "<p style='padding:20px; color:#aaa;'>No movies found. Try another name!</p>";
+                return;
+            }
+
+            movies.forEach(movie => {
+                if (!movie.poster_path) return; 
+                const posterUrl = `https://tmdb.org{movie.poster_path}`;
+                
+                const platforms = ["netflix", "jiostar", "prime", "marvel"];
+                const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+                
+                let finalAppUrl = "";
+                const cleanTitle = encodeURIComponent(movie.title);
+                finalAppUrl = `https://youtube.com{cleanTitle}+official+trailer`;
+
+                grid.innerHTML += `
+                    <div class="movie-card">
+                        <img class="movie-poster" src="${posterUrl}" alt="${movie.title}">
+                        <div class="movie-info">
+                            <div class="movie-title">${movie.title}</div>
+                            <span class="platform-tag" style="background:${getPlatformColor(randomPlatform)}">${randomPlatform}</span>
+                            <a class="watch-btn" href="${finalAppUrl}" target="_blank">Watch Now</a>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function getPlatformColor(platform) {
+            if (platform === 'netflix') return '#E50914';
+            if (platform === 'prime') return '#00A8E1';
+            if (platform === 'jiostar') return '#0F3CC9';
+            return '#F0131E';
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') { searchLiveMovies(); }
+        }
+
+        function openSubModal() {
+            alert("👑 Next Watch Premium Activation:\n\nPlan 1: 12 Days for ₹40\nPlan 2: 32 Days for ₹144\n\nGoogle Play Payment Gateway Interface linking initiated!");
+        }
+
+        loadTrendingMovies();
+    </script>
+</body>
+</html>
